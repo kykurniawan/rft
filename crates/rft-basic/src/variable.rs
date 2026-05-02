@@ -20,4 +20,25 @@ mod tests {
 
         println!("Hello, {}! You are {} years old.", name, age);
     }
+
+    #[test]
+    fn shadowing() {
+        let name = "Alice";
+        let age = 30;
+
+        println!("Hello, {}! You are {} years old.", name, age);
+
+        let name = "Bob";
+        let age = 31;
+
+        println!("Hello, {}! You are {} years old.", name, age);
+    }
+
+    #[test]
+    fn constant() {
+        const NAME: &str = "Alice";
+        const AGE: u32 = 30;
+
+        println!("Hello, {}! You are {} years old.", NAME, AGE);
+    }
 }
