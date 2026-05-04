@@ -7,6 +7,10 @@ name = "rft-basic"
 version = "0.1.0"
 
 [[package]]
+name = "rft-collection"
+version = "0.1.0"
+
+[[package]]
 name = "rft-ownership"
 version = "0.1.0"
 
