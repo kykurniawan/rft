@@ -1,5 +1,5 @@
 [package]
-name = "struct-and-enum"
+name = "rft-struct-and-enum"
 version = "0.1.0"
 edition = "2024"
 
