@@ -1,14 +1,16 @@
 use uuid::Uuid;
 
-use crate::entities::Todo;
+use crate::services::TodoService;
 
 pub struct Application {
-    todos: Vec<Todo>,
+    todo_service: TodoService,
 }
 
 impl Application {
     pub fn new() -> Self {
-        Application { todos: Vec::new() }
+        Application {
+            todo_service: TodoService::new(),
+        }
     }
 
     pub fn print_header(&self) {
@@ -46,30 +48,25 @@ impl Application {
     }
 
     pub fn list_todos(&self) {
-        if self.todos.is_empty() {
+        let completed_todos = self.todo_service.find_all(Some(true));
+        let incomplete_todos = self.todo_service.find_all(Some(false));
+
+        println!("Incomplete Todos =====================");
+        if incomplete_todos.is_empty() {
             println!("No todos");
-        } else {
-            let incomplete_todos = self
-                .todos
-                .iter()
-                .filter(|t| !t.completed)
-                .collect::<Vec<&Todo>>();
+        }
+        for todo in incomplete_todos {
+            todo.print();
+            println!("----------------------------------------");
+        }
 
-            let completed_todos = self
-                .todos
-                .iter()
-                .filter(|t| t.completed)
-                .collect::<Vec<&Todo>>();
-
-            println!("Incomplete todos:");
-            for todo in incomplete_todos {
-                todo.print();
-            }
-
-            println!("Completed todos:");
-            for todo in completed_todos {
-                todo.print();
-            }
+        println!("Completed Todos =====================");
+        if completed_todos.is_empty() {
+            println!("No todos");
+        }
+        for todo in completed_todos {
+            todo.print();
+            println!("----------------------------------------");
         }
 
         self.print_header();
@@ -81,12 +78,13 @@ impl Application {
         std::io::stdin().read_line(&mut input).unwrap();
 
         let title = input.trim().to_string();
-        let id = Uuid::new_v4();
-        let completed = false;
 
-        self.todos.push(Todo::new(id, title, completed));
-
-        println!("Todo added");
+        match self.todo_service.add(title) {
+            Ok(id) => {
+                println!("Todo added: {}", id);
+            }
+            Err(err) => println!("Error: {}", err),
+        }
 
         self.print_header();
     }
@@ -96,18 +94,28 @@ impl Application {
         let mut input = String::new();
         std::io::stdin().read_line(&mut input).unwrap();
 
-        let id = input.trim().parse::<Uuid>().unwrap();
+        let id = match input.trim().parse::<Uuid>() {
+            Ok(id) => id,
+            Err(_) => {
+                println!("Invalid id");
+                self.edit_todo();
+                return;
+            }
+        };
 
-        if let Some(todo) = self.todos.iter_mut().find(|t| t.id == id) {
-            println!("Enter the new title of the todo: ");
-            let mut input = String::new();
-            std::io::stdin().read_line(&mut input).unwrap();
-
-            let title = input.trim().to_string();
-            todo.title = title;
-            todo.print();
-        } else {
+        if self.todo_service.find_by_id(id).is_none() {
             println!("Todo not found");
+            return;
+        }
+
+        println!("Enter the new title of the todo: ");
+        let mut input = String::new();
+        std::io::stdin().read_line(&mut input).unwrap();
+        let title = input.trim().to_string();
+
+        match self.todo_service.edit(id, title) {
+            Ok(_) => println!("Todo edited"),
+            Err(err) => println!("Error: {}", err),
         }
 
         self.print_header();
@@ -118,13 +126,18 @@ impl Application {
         let mut input = String::new();
         std::io::stdin().read_line(&mut input).unwrap();
 
-        let id = input.trim().parse::<Uuid>().unwrap();
+        let id = match input.trim().parse::<Uuid>() {
+            Ok(id) => id,
+            Err(_) => {
+                println!("Invalid id");
+                self.delete_todo();
+                return;
+            }
+        };
 
-        if let Some(index) = self.todos.iter().position(|t| t.id == id) {
-            self.todos.remove(index);
-            println!("Todo deleted");
-        } else {
-            println!("Todo not found");
+        match self.todo_service.delete(id) {
+            Ok(_) => println!("Todo deleted"),
+            Err(err) => println!("Error: {}", err),
         }
 
         self.print_header();
@@ -135,13 +148,18 @@ impl Application {
         let mut input = String::new();
         std::io::stdin().read_line(&mut input).unwrap();
 
-        let id = input.trim().parse::<Uuid>().unwrap();
+        let id = match input.trim().parse::<Uuid>() {
+            Ok(id) => id,
+            Err(_) => {
+                println!("Invalid id");
+                self.mark_completed();
+                return;
+            }
+        };
 
-        if let Some(todo) = self.todos.iter_mut().find(|t| t.id == id) {
-            todo.completed = true;
-            todo.print();
-        } else {
-            println!("Todo not found");
+        match self.todo_service.mark_completed(id) {
+            Ok(_) => println!("Todo marked as completed"),
+            Err(err) => println!("Error: {}", err),
         }
 
         self.print_header();
