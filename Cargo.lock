@@ -19,5 +19,9 @@ name = "rft-ownership"
 version = "0.1.0"
 
 [[package]]
+name = "rft-project-structure"
+version = "0.1.0"
+
+[[package]]
 name = "rft-struct-and-enum"
 version = "0.1.0"
