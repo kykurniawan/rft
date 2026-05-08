@@ -1,0 +1,35 @@
+use std::sync::Arc;
+
+use axum::{Router, extract::FromRef, routing::{get, post}};
+
+use crate::user::service::UserService;
+
+pub mod entity;
+pub mod error;
+pub mod handler;
+pub mod repository;
+pub mod service;
+
+#[derive(Clone)]
+pub struct UserState {
+    pub user_service: Arc<UserService>,
+}
+
+impl UserState {
+    pub fn new(user_service: UserService) -> Self {
+        Self {
+            user_service: Arc::new(user_service),
+        }
+    }
+}
+
+pub fn router<S>() -> Router<S>
+where
+    Arc<UserState>: FromRef<S>,
+    S: Clone + Send + Sync + 'static,
+{
+    Router::new()
+        .route("/", get(handler::index))
+        .route("/{id}", get(handler::find))
+        .route("/create", post(handler::create))
+}

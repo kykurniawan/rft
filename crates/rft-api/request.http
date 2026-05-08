@@ -1,0 +1,14 @@
+###
+GET http://localhost:3000/users
+
+###
+GET http://localhost:3000/users/c420ec4e-9a98-4508-8810-913d46c9e974
+
+###
+POST http://localhost:3000/users/create
+Content-Type: application/json
+
+{
+  "name": "Kurniawan",
+  "email": "kurniawan@example.com"
+}

@@ -1,6 +1,7 @@
 [workspace]
 resolver = "3"
 members = [
+    "crates/rft-api",
     "crates/rft-basic",
     "crates/rft-collection",
     "crates/rft-error-handling",
