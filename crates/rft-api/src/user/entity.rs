@@ -1,6 +1,10 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+// Core domain entity representing a user.
+// id is kept private with a getter because it is auto-generated and should
+// never be set from outside. name and email are public for direct access
+// (this is fine for a simple in-memory CRUD — larger apps would use setters/DTOs).
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct User {
     id: Uuid,

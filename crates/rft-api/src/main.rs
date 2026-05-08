@@ -7,6 +7,8 @@ use crate::user::{UserState, repository::UserRepository, service::UserService};
 
 mod user;
 
+// Root application state, composed of sub-states for each domain module.
+// FromRef allows Axum to extract a sub-state (Arc<UserState>) from the root AppState.
 #[derive(Clone)]
 pub struct AppState {
     pub user_state: Arc<UserState>,
@@ -18,6 +20,8 @@ impl axum::extract::FromRef<AppState> for Arc<UserState> {
     }
 }
 
+// Builds the dependency graph manually (no DI framework). Repository → Service → State.
+// In a larger app this would be extracted into a bootstrap or composition-root module.
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let user_repository = UserRepository::new();

@@ -1,3 +1,7 @@
+// User module — groups all user-related logic: entity, repository, service, handlers.
+// UserState wraps UserService in an Arc so a single shared instance can be
+// extracted by every handler via Axum's State extractor (multi-thread safe).
+
 use std::sync::Arc;
 
 use axum::{Router, extract::FromRef, routing::{get, post}};
