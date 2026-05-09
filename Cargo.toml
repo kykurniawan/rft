@@ -3,7 +3,7 @@ resolver = "3"
 members = [
     "crates/rft-api", "crates/rft-async",
     "crates/rft-basic",
-    "crates/rft-collection", "crates/rft-database",
+    "crates/rft-collection", "crates/rft-database", "crates/rft-error",
     "crates/rft-error-handling",
     "crates/rft-mini-project",
     "crates/rft-ownership",
