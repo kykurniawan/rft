@@ -13,7 +13,10 @@ impl TodoService {
 
     pub fn find_all(&self, completed: Option<bool>) -> Vec<&Todo> {
         if let Some(complete) = completed {
-            self.todos.iter().filter(|t| t.completed == complete).collect()
+            self.todos
+                .iter()
+                .filter(|t| t.completed == complete)
+                .collect()
         } else {
             self.todos.iter().collect()
         }

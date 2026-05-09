@@ -33,10 +33,7 @@ pub async fn index(State(state): State<Arc<UserState>>) -> impl IntoResponse {
 
 // Axum's Path<Uuid> parses the {id} segment into a Uuid automatically.
 // If parsing fails (malformed UUID), Axum rejects the request with a 404.
-pub async fn find(
-    State(state): State<Arc<UserState>>,
-    Path(id): Path<Uuid>,
-) -> impl IntoResponse {
+pub async fn find(State(state): State<Arc<UserState>>, Path(id): Path<Uuid>) -> impl IntoResponse {
     let result = state.user_service.get_user_by_id(id);
 
     match result {

@@ -8,8 +8,9 @@ use crate::user::{UserState, repository::UserRepository, service::UserService};
 mod database;
 mod user;
 
-// Root application state, composed of sub-states for each domain module.
-// FromRef allows Axum to extract a sub-state (Arc<UserState>) from the root AppState.
+// Root application state. Holds shared dependencies for all routes.
+// FromRef lets Axum extract a sub-state (Arc<UserState>) from AppState
+// without the handler knowing about other parts of the application.
 #[derive(Clone)]
 pub struct AppState {
     pub user_state: Arc<UserState>,
@@ -21,13 +22,19 @@ impl axum::extract::FromRef<AppState> for Arc<UserState> {
     }
 }
 
-// Builds the dependency graph manually (no DI framework). Repository → Service → State.
-// In a larger app this would be extracted into a bootstrap or composition-root module.
+// Composition root — wires dependencies manually: Pool → Repository → Service → State.
+// No DI framework needed for a crate this size.
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let db =
-        database::create_connection("postgres://root:%40passWORD1@localhost:5432/rft_database")
-            .await?;
+    // Load .env into the process environment so std::env::var() can find DATABASE_URL.
+    // The `_` return value is a Result — we ignore failure because .env is optional
+    // (e.g. in production env vars are set directly by the container/deploy system).
+    let _ = dotenvy::dotenv();
+
+    let database_url = std::env::var("DATABASE_URL")
+        .unwrap_or_else(|_| "postgres://postgres:postgres@localhost:5432/rft_database".to_string());
+
+    let db = database::create_connection(&database_url).await?;
 
     let user_repository = UserRepository::new(db);
     let user_service = UserService::new(user_repository);

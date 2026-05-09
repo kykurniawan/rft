@@ -1,5 +1,5 @@
-mod ownership;
 mod borrowing;
+mod ownership;
 
 fn main() {
     let s_for_print = String::from("Hello, world!"); // memory allocation, s_for_print is the owner of the string

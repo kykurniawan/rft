@@ -55,7 +55,8 @@ pub async fn create(
     let result = state.user_service.create_user(req.name, req.email).await;
 
     match result {
-        Ok(user) => (StatusCode::OK, Json(json!({ "user": user }))).into_response(),
+        // CREATED (201) signals that a new resource was successfully made.
+        Ok(user) => (StatusCode::CREATED, Json(json!({ "user": user }))).into_response(),
         Err(error) => error.to_response().into_response(),
     }
 }

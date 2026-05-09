@@ -16,6 +16,14 @@ pub enum UserError {
     InternalError,
 }
 
+// Auto-converts sqlx errors into our domain error so repository methods can
+// use `?` directly on sqlx query results instead of manual .map_err() chains.
+impl From<sqlx::Error> for UserError {
+    fn from(_: sqlx::Error) -> Self {
+        Self::InternalError
+    }
+}
+
 impl UserError {
     // Converts the error into an HTTP response tuple, so every handler
     // branches with the same concrete return type: (StatusCode, Json<Value>).
