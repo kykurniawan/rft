@@ -1,0 +1,26 @@
+###
+GET http://localhost:3000/users
+
+###
+GET http://localhost:3000/users/6a086e0b-45c8-4cf2-bc25-c57f20f5e022
+
+###
+POST http://localhost:3000/users/create
+Content-Type: application/json
+
+{
+  "name": "Delete",
+  "email": "delete@example.com"
+}
+
+###
+PUT http://localhost:3000/users/6a086e0b-45c8-4cf2-bc25-c57f20f5e022
+Content-Type: application/json
+
+{
+  "name": "Bambang Sentosa",
+  "email": "bambang.sentosa@example.com"
+}
+
+###
+DELETE http://localhost:3000/users/9a8237bb-42c3-4e77-987d-98d373f16027

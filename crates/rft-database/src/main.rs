@@ -1,0 +1,51 @@
+use std::sync::Arc;
+
+use axum::Router;
+use tokio::net::TcpListener;
+
+use crate::user::{UserState, repository::UserRepository, service::UserService};
+
+mod database;
+mod user;
+
+// Root application state, composed of sub-states for each domain module.
+// FromRef allows Axum to extract a sub-state (Arc<UserState>) from the root AppState.
+#[derive(Clone)]
+pub struct AppState {
+    pub user_state: Arc<UserState>,
+}
+
+impl axum::extract::FromRef<AppState> for Arc<UserState> {
+    fn from_ref(state: &AppState) -> Self {
+        state.user_state.clone()
+    }
+}
+
+// Builds the dependency graph manually (no DI framework). Repository → Service → State.
+// In a larger app this would be extracted into a bootstrap or composition-root module.
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let db =
+        database::create_connection("postgres://root:%40passWORD1@localhost:5432/rft_database")
+            .await?;
+
+    let user_repository = UserRepository::new(db);
+    let user_service = UserService::new(user_repository);
+    let user_state = UserState::new(user_service);
+
+    let app_state = AppState {
+        user_state: Arc::new(user_state),
+    };
+
+    let app = Router::new()
+        .nest("/users", user::router())
+        .with_state(app_state);
+
+    let listener = TcpListener::bind("0.0.0.0:3000").await?;
+
+    println!("Listening on http://0.0.0.0:3000");
+
+    axum::serve(listener, app).await?;
+
+    Ok(())
+}
