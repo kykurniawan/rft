@@ -1,0 +1,12 @@
+appenders:
+  stdout:
+    kind: console
+  file:
+    kind: file
+    path: "$ENV{PWD}/log/application.log"
+
+root:
+  level: info
+  appenders:
+    - stdout
+    - file
