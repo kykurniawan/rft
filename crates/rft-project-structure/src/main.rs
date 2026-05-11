@@ -5,11 +5,12 @@ mod entities;
 fn main() {
     let coding_hobby = Hobby::new(1, String::from("Coding"));
     let running_hobby = Hobby::new(2, String::from("Running"));
+    let swimming_hobby = Hobby::new(3, String::from("Swimming"));
 
     let user = User::new(
         1,
         String::from("Rizky Kurniawan"),
-        vec![coding_hobby, running_hobby],
+        vec![coding_hobby, running_hobby, swimming_hobby],
     );
 
     println!("User ID: {}", user.get_id());
