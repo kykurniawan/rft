@@ -1,10 +1,15 @@
 use sqlx::{Pool, Postgres, QueryBuilder};
+use uuid::Uuid;
 
 use crate::domain::{
-    shared::db::{FilterValue, Paginated, Pagination, Query, SortOrder},
+    shared::{
+        db::{FilterValue, Paginated, Pagination, Query, SortOrder},
+        error::RepositoryError,
+    },
     user::User,
 };
 
+#[derive(Clone)]
 pub struct UserRepository {
     db: Pool<Postgres>,
 }
@@ -14,7 +19,7 @@ impl UserRepository {
         Self { db }
     }
 
-    pub async fn find(&self, query: Query) -> Result<Paginated<User>, sqlx::Error> {
+    pub async fn find(&self, query: Query) -> Result<Paginated<User>, RepositoryError> {
         let pagination = query.pagination.clone().unwrap_or(Pagination {
             page: 1,
             page_size: 10,
@@ -103,6 +108,17 @@ impl UserRepository {
             page: pagination.page,
             page_size: pagination.page_size,
         })
+    }
+
+    pub async fn find_by_id(&self, id: Uuid) -> Result<Option<User>, sqlx::Error> {
+        let user = sqlx::query_as(
+            "SELECT id, name, is_active, created_at, updated_at FROM users WHERE id = $1",
+        )
+        .bind(id)
+        .fetch_optional(&self.db)
+        .await?;
+
+        Ok(user)
     }
 
     fn apply_user_conditions(&self, builder: &mut QueryBuilder<Postgres>, query: &Query) {
