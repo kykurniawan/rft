@@ -4,20 +4,27 @@ use serde::Deserialize;
 #[derive(Debug, Deserialize, Clone)]
 #[allow(unused)]
 pub struct Tracing {
+    // TRACING__DIRECTORY
     pub directory: String,
+
+    // TRACING__FILENAME_SUFFIX
     pub filename_suffix: String,
 }
 
 #[derive(Debug, Deserialize, Clone)]
 #[allow(unused)]
 pub struct Database {
+    // DATABASE__CONNECTION_STRING
     pub connection_string: String,
 }
 
 #[derive(Debug, Deserialize, Clone)]
 #[allow(unused)]
 pub struct Server {
+    // SERVER__HOST
     pub host: String,
+
+    // SERVER__PORT
     pub port: u16,
 }
 
