@@ -1,7 +1,7 @@
 use sqlx::{Pool, Postgres, postgres::PgPoolOptions};
 use tracing::{error, info};
 
-use crate::common::config::Database;
+use crate::core::config::Database;
 
 pub async fn connect(config: &Database) -> Result<Pool<Postgres>, sqlx::Error> {
     info!("connecting to database");

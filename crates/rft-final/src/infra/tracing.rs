@@ -1,7 +1,7 @@
 use tracing_appender::{non_blocking::WorkerGuard, rolling::Rotation};
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
-use crate::common::config::Tracing;
+use crate::core::config::Tracing;
 
 pub fn init(config: &Tracing) -> WorkerGuard {
     let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));

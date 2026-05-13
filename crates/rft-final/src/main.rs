@@ -1,18 +1,14 @@
-use crate::common::config::Config;
-
-mod app;
-mod common;
+mod core;
 mod domain;
 mod infra;
-mod state;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenvy::dotenv()?;
 
-    let cfg = Config::new()?;
+    let cfg = core::config::Config::new()?;
 
-    let app = app::init(cfg).await?;
+    let app = core::app::init(cfg).await?;
 
     app.run().await?;
 
