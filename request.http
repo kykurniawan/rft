@@ -15,14 +15,13 @@ Content-Type: application/json
     "name": "Bunga Mawar"
 }
 
-### Update user
-PUT http://localhost:8000/api/users/1?sort=name:desc
+### Partial Update user
+PATCH http://localhost:8000/api/users/883607f0-1ec6-47c6-be30-8e3c42a81a2c
 Accept: application/json
 Content-Type: application/json
 
 {
-    "name": "Jane Doe",
-    "email": "jane.doe@example.com"
+    "is_active": true
 }
 
 ### Delete user

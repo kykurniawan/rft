@@ -1,3 +1,4 @@
+use chrono::Utc;
 use uuid::Uuid;
 
 use crate::domain::{
@@ -65,5 +66,34 @@ impl UserService {
         let user = User::new(Uuid::now_v7(), name.to_string(), true);
 
         self.repository.save(&user).await.map_err(Into::into)
+    }
+
+    pub async fn update_user(
+        &self,
+        id: Uuid,
+        name: Option<String>,
+        is_active: Option<bool>,
+    ) -> Result<User, UserServiceError> {
+        let user = self.repository.find_by_id(id).await;
+
+        let user = match user {
+            Ok(user) => user,
+            Err(error) => match error {
+                RepositoryError::NotFound => return Err(UserServiceError::UserNotFound),
+                _ => return Err(UserServiceError::Internal(error.to_string())),
+            },
+        };
+
+        let user = user.ok_or(UserServiceError::UserNotFound)?;
+
+        let user = User {
+            id: user.id,
+            name: name.unwrap_or(user.name).to_string(),
+            is_active: is_active.unwrap_or(user.is_active),
+            created_at: user.created_at,
+            updated_at: Utc::now(),
+        };
+
+        self.repository.update(id, &user).await.map_err(Into::into)
     }
 }

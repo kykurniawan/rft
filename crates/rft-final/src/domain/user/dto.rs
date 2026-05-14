@@ -9,6 +9,12 @@ pub struct CreateUserRequest {
     pub name: String,
 }
 
+#[derive(Debug, Clone, Deserialize)]
+pub struct UpdateUserRequest {
+    pub name: Option<String>,
+    pub is_active: Option<bool>,
+}
+
 #[derive(Debug, Clone, Serialize)]
 pub struct UserResponse {
     pub id: Uuid,

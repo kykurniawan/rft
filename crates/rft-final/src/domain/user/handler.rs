@@ -13,7 +13,7 @@ use crate::{
             dto::{PaginatedResponse, PaginationRequest},
             error::AppError,
         },
-        user::{CreateUserRequest, UserResponse, UserServiceError},
+        user::{CreateUserRequest, UpdateUserRequest, UserResponse, UserServiceError},
     },
 };
 
@@ -80,4 +80,24 @@ pub async fn store(
     };
 
     Ok((StatusCode::CREATED, Json(UserResponse::from(user))))
+}
+
+pub async fn update(
+    State(state): State<AppState>,
+    WithRejection(Path(id), _): WithRejection<Path<Uuid>, AppError>,
+    WithRejection(Json(request), _): WithRejection<Json<UpdateUserRequest>, AppError>,
+) -> Result<(StatusCode, Json<UserResponse>), AppError> {
+    let name = request.name;
+    let is_active = request.is_active;
+    let user = state.user_service.update_user(id, name, is_active).await;
+
+    let user = match user {
+        Ok(user) => user,
+        Err(error) => match error {
+            UserServiceError::UserNotFound => return Err(AppError::NotFound(error.to_string())),
+            _ => return Err(AppError::Internal(error.to_string())),
+        },
+    };
+
+    Ok((StatusCode::OK, Json(UserResponse::from(user))))
 }

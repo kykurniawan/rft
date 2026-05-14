@@ -170,4 +170,18 @@ impl UserRepository {
 
         Ok(created)
     }
+
+    pub async fn update(&self, id: Uuid, user: &User) -> Result<User, RepositoryError> {
+        let updated = sqlx::query_as(
+            "UPDATE users SET name = $1, is_active = $2, updated_at = $3 WHERE id = $4 RETURNING id, name, is_active, created_at, updated_at",
+        )
+        .bind(&user.name)
+        .bind(user.is_active)
+        .bind(user.updated_at)
+        .bind(id)
+        .fetch_one(&self.db)
+        .await?;
+
+        Ok(updated)
+    }
 }
