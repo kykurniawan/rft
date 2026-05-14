@@ -20,14 +20,12 @@ pub async fn index(
 
     let users = match users {
         Ok(users) => users,
-        Err(error) => {
-            match error {
-                UserServiceError::InvalidFilter(_) => {
-                    return Err(AppError::BadRequest(error.to_string()));
-                }
-                _ => return Err(AppError::Internal(error.to_string())),
+        Err(error) => match error {
+            UserServiceError::InvalidFilter(_) => {
+                return Err(AppError::BadRequest(error.to_string()));
             }
-        }
+            _ => return Err(AppError::Internal(error.to_string())),
+        },
     };
 
     Ok(Json(PaginatedResponse {

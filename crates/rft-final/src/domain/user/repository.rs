@@ -30,7 +30,7 @@ impl UserRepository {
         let mut count_builder =
             QueryBuilder::<Postgres>::new("SELECT COUNT(*) FROM users WHERE 1 = 1");
 
-        self.apply_user_conditions(&mut count_builder, &query);
+        self.apply_find_condition(&mut count_builder, &query);
 
         let total: i64 = count_builder
             .build_query_scalar()
@@ -43,7 +43,7 @@ impl UserRepository {
             "#,
         );
 
-        self.apply_user_conditions(&mut builder, &query);
+        self.apply_find_condition(&mut builder, &query);
 
         if let Some(sorts) = &query.sorts {
             let mut has_order_by = false;
@@ -110,18 +110,7 @@ impl UserRepository {
         })
     }
 
-    pub async fn find_by_id(&self, id: Uuid) -> Result<Option<User>, sqlx::Error> {
-        let user = sqlx::query_as(
-            "SELECT id, name, is_active, created_at, updated_at FROM users WHERE id = $1",
-        )
-        .bind(id)
-        .fetch_optional(&self.db)
-        .await?;
-
-        Ok(user)
-    }
-
-    fn apply_user_conditions(&self, builder: &mut QueryBuilder<Postgres>, query: &Query) {
+    fn apply_find_condition(&self, builder: &mut QueryBuilder<Postgres>, query: &Query) {
         if let Some(filters) = &query.filters {
             for filter in filters {
                 match filter.by.as_str() {
@@ -143,5 +132,16 @@ impl UserRepository {
             let search = format!("%{}%", search);
             builder.push(" AND name ILIKE ").push_bind(search);
         }
+    }
+
+    pub async fn find_by_id(&self, id: Uuid) -> Result<Option<User>, sqlx::Error> {
+        let user = sqlx::query_as(
+            "SELECT id, name, is_active, created_at, updated_at FROM users WHERE id = $1",
+        )
+        .bind(id)
+        .fetch_optional(&self.db)
+        .await?;
+
+        Ok(user)
     }
 }
