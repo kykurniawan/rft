@@ -11,6 +11,7 @@ use tower_http::{
     trace::TraceLayer,
 };
 use tracing::info;
+use tracing_appender::non_blocking::WorkerGuard;
 
 use crate::{
     core,
@@ -19,7 +20,7 @@ use crate::{
 };
 
 pub async fn init(config: core::config::Config) -> Result<App, Box<dyn std::error::Error>> {
-    let _tracing = core::tracing::init(&config.tracing);
+    let tracing = core::tracing::init(&config.tracing);
 
     info!("initializing application");
 
@@ -35,10 +36,16 @@ pub async fn init(config: core::config::Config) -> Result<App, Box<dyn std::erro
 
     info!("application initialized");
 
-    Ok(App { config, state })
+    Ok(App {
+        config,
+        state,
+        tracing,
+    })
 }
 
 pub struct App {
+    #[allow(unused)]
+    tracing: WorkerGuard,
     config: core::config::Config,
     state: core::state::AppState,
 }

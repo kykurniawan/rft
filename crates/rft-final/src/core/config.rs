@@ -9,6 +9,9 @@ pub struct Tracing {
 
     // TRACING__FILENAME_SUFFIX
     pub filename_suffix: String,
+
+    // TRACING__ENV_FILTER
+    pub env_filter: String,
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -52,6 +55,7 @@ impl Config {
         cfg = cfg
             .set_default("tracing.directory", "logs")?
             .set_default("tracing.filename_suffix", "application.log")?
+            .set_default("tracing.env_filter", "info")?
             .set_default("server.host", "0.0.0.0")?
             .set_default("server.port", 3000)?;
 

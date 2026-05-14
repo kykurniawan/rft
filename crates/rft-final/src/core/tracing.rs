@@ -4,7 +4,8 @@ use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberI
 use crate::core::config::Tracing;
 
 pub fn init(config: &Tracing) -> WorkerGuard {
-    let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
+    let env_filter = EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| EnvFilter::new(config.env_filter.as_str()));
 
     let file_suffix = Some(&config.filename_suffix)
         .filter(|s| !s.is_empty())
@@ -30,8 +31,8 @@ pub fn init(config: &Tracing) -> WorkerGuard {
 
     tracing_subscriber::registry()
         .with(env_filter)
-        .with(stdout_layer)
         .with(file_layer)
+        .with(stdout_layer)
         .init();
 
     worker_guard
