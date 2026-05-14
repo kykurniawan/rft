@@ -26,7 +26,7 @@ impl UserService {
             for filter in filters {
                 match filter.by.as_str() {
                     "is_active" => {}
-                    _ => return Err(UserServiceError::Internal("invalid filter by".to_string())),
+                    _ => return Err(UserServiceError::InvalidFilter(filter.by.clone())),
                 }
             }
         }

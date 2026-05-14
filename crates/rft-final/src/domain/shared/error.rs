@@ -36,16 +36,24 @@ pub enum AppError {
 
     #[error("internal error: {0:?}")]
     Internal(String),
+
+    #[error("bad request: {0}")]
+    BadRequest(String),
 }
 
 impl IntoResponse for AppError {
     fn into_response(self) -> axum::response::Response {
-        let (status, error_message) = match self {
-            AppError::NotFound(msg) => (StatusCode::NOT_FOUND, msg),
-            AppError::Conflict(msg) => (StatusCode::CONFLICT, msg),
-            AppError::Internal(msg) => (StatusCode::INTERNAL_SERVER_ERROR, msg),
+        let (status, error_message) = match &self {
+            AppError::NotFound(_) => (StatusCode::NOT_FOUND, self),
+            AppError::Conflict(_) => (StatusCode::CONFLICT, self),
+            AppError::BadRequest(_) => (StatusCode::BAD_REQUEST, self),
+            AppError::Internal(_) => {
+                tracing::error!(?self, "internal server error");
+                (StatusCode::INTERNAL_SERVER_ERROR, self)
+            }
         };
 
-        (status, error_message).into_response()
+        let body = error_message.to_string();
+        (status, body).into_response()
     }
 }

@@ -11,6 +11,9 @@ pub enum UserServiceError {
     #[error("user is inactive")]
     UserInactive,
 
+    #[error("invalid filter by: {0}")]
+    InvalidFilter(String),
+
     #[error("internal error")]
     Internal(String),
 }
@@ -20,7 +23,7 @@ impl From<RepositoryError> for UserServiceError {
         match &e {
             RepositoryError::NotFound => UserServiceError::UserNotFound,
             RepositoryError::Conflict(msg) => UserServiceError::Internal(msg.clone()),
-            RepositoryError::Database(db_err) => UserServiceError::Internal(db_err.to_string()),
+            RepositoryError::Database(db_err) => UserServiceError::Internal(format!("{db_err:?}")),
         }
     }
 }
