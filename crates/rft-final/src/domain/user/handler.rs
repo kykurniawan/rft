@@ -16,7 +16,7 @@ pub async fn index(
     State(state): State<AppState>,
     Query(request): Query<PaginationRequest>,
 ) -> Result<Json<PaginatedResponse<UserResponse>>, AppError> {
-    let users = state.user_service.find(request.into_query()).await;
+    let users = state.user_service.get_users(request.into_query()).await;
 
     let users = match users {
         Ok(users) => users,

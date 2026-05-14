@@ -12,7 +12,7 @@ impl UserService {
         Self { repository }
     }
 
-    pub async fn find(&self, query: Query) -> Result<Paginated<User>, UserServiceError> {
+    pub async fn get_users(&self, query: Query) -> Result<Paginated<User>, UserServiceError> {
         if let Some(sorts) = &query.sorts {
             for sort in sorts {
                 match sort.by.as_str() {
