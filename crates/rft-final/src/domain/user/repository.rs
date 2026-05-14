@@ -134,7 +134,7 @@ impl UserRepository {
         }
     }
 
-    pub async fn find_by_id(&self, id: Uuid) -> Result<Option<User>, sqlx::Error> {
+    pub async fn find_by_id(&self, id: Uuid) -> Result<Option<User>, RepositoryError> {
         let user = sqlx::query_as(
             "SELECT id, name, is_active, created_at, updated_at FROM users WHERE id = $1",
         )

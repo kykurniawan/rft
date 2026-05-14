@@ -1,5 +1,9 @@
-use axum::{Json, extract::State};
+use axum::{
+    Json,
+    extract::{Path, State},
+};
 use axum_extra::extract::Query;
+use uuid::Uuid;
 
 use crate::{
     core::state::AppState,
@@ -34,4 +38,26 @@ pub async fn index(
         page: users.page,
         page_size: users.page_size,
     }))
+}
+
+pub async fn show(
+    State(state): State<AppState>,
+    Path(id): Path<Uuid>,
+) -> Result<Json<UserResponse>, AppError> {
+    let user = state.user_service.get_user_by_id(id).await;
+
+    let user = match user {
+        Ok(user) => {
+            if user.is_none() {
+                return Err(AppError::NotFound(format!("user with id {} not found", id)));
+            }
+            user.unwrap()
+        }
+        Err(error) => match error {
+            UserServiceError::UserNotFound => return Err(AppError::NotFound(error.to_string())),
+            _ => return Err(AppError::Internal(error.to_string())),
+        },
+    };
+
+    Ok(Json(UserResponse::from(user)))
 }

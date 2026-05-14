@@ -1,5 +1,10 @@
+use uuid::Uuid;
+
 use crate::domain::{
-    shared::db::{Paginated, Query},
+    shared::{
+        db::{Paginated, Query},
+        error::RepositoryError,
+    },
     user::{User, UserRepository, UserServiceError},
 };
 
@@ -32,5 +37,19 @@ impl UserService {
         }
 
         self.repository.find(query).await.map_err(Into::into)
+    }
+
+    pub async fn get_user_by_id(&self, id: Uuid) -> Result<Option<User>, UserServiceError> {
+        let user = self.repository.find_by_id(id).await;
+
+        let user = match user {
+            Ok(user) => user,
+            Err(error) => match error {
+                RepositoryError::NotFound => return Ok(None),
+                _ => return Err(UserServiceError::Internal(error.to_string())),
+            },
+        };
+
+        Ok(user)
     }
 }
