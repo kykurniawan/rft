@@ -1,4 +1,5 @@
-use axum::{http::StatusCode, response::IntoResponse};
+use axum::{Json, http::StatusCode, response::IntoResponse};
+use serde_json::json;
 
 #[derive(Debug, thiserror::Error)]
 pub enum RepositoryError {
@@ -53,7 +54,7 @@ impl IntoResponse for AppError {
             }
         };
 
-        let body = error_message.to_string();
-        (status, body).into_response()
+        let body = json!({ "error": error_message.to_string() });
+        (status, Json(body)).into_response()
     }
 }
