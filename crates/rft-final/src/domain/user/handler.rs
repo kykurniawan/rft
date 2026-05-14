@@ -101,3 +101,18 @@ pub async fn update(
 
     Ok((StatusCode::OK, Json(UserResponse::from(user))))
 }
+
+pub async fn delete(
+    State(state): State<AppState>,
+    WithRejection(Path(id), _): WithRejection<Path<Uuid>, AppError>,
+) -> Result<(StatusCode, ()), AppError> {
+    let user = state.user_service.delete_user(id).await;
+
+    match user {
+        Ok(_) => Ok((StatusCode::NO_CONTENT, ())),
+        Err(error) => match error {
+            UserServiceError::UserNotFound => Err(AppError::NotFound(error.to_string())),
+            _ => Err(AppError::Internal(error.to_string())),
+        },
+    }
+}

@@ -184,4 +184,18 @@ impl UserRepository {
 
         Ok(updated)
     }
+
+    pub async fn delete(&self, id: Uuid) -> Result<(), RepositoryError> {
+        let deleted = sqlx::query("DELETE FROM users WHERE id = $1")
+            .bind(id)
+            .execute(&self.db)
+            .await?
+            .rows_affected();
+
+        if deleted == 0 {
+            return Err(RepositoryError::NotFound);
+        }
+
+        Ok(())
+    }
 }

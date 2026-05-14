@@ -96,4 +96,20 @@ impl UserService {
 
         self.repository.update(id, &user).await.map_err(Into::into)
     }
+
+    pub async fn delete_user(&self, id: Uuid) -> Result<(), UserServiceError> {
+        let user = self.repository.find_by_id(id).await;
+
+        let user = match user {
+            Ok(user) => user,
+            Err(error) => match error {
+                RepositoryError::NotFound => return Err(UserServiceError::UserNotFound),
+                _ => return Err(UserServiceError::Internal(error.to_string())),
+            },
+        };
+
+        let user = user.ok_or(UserServiceError::UserNotFound)?;
+
+        self.repository.delete(user.id).await.map_err(Into::into)
+    }
 }
