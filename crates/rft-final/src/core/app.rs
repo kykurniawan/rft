@@ -13,13 +13,13 @@ use tower_http::{
 use tracing::info;
 
 use crate::{
-    core::{config::Config, routing, state::AppState},
+    core,
     domain::{self},
     infra,
 };
 
-pub async fn init(config: Config) -> Result<App, Box<dyn std::error::Error>> {
-    let _tracing = infra::tracing::init(&config.tracing);
+pub async fn init(config: core::config::Config) -> Result<App, Box<dyn std::error::Error>> {
+    let _tracing = core::tracing::init(&config.tracing);
 
     info!("initializing application");
 
@@ -29,7 +29,7 @@ pub async fn init(config: Config) -> Result<App, Box<dyn std::error::Error>> {
 
     let user_service = domain::user::UserService::new(user_repository.clone());
 
-    let state = AppState {
+    let state = core::state::AppState {
         user_service: Arc::new(user_service),
     };
 
@@ -39,15 +39,15 @@ pub async fn init(config: Config) -> Result<App, Box<dyn std::error::Error>> {
 }
 
 pub struct App {
-    config: Config,
-    state: AppState,
+    config: core::config::Config,
+    state: core::state::AppState,
 }
 
 impl App {
     pub async fn run(&self) -> Result<(), Box<dyn std::error::Error>> {
         info!("preparing http server");
 
-        let router = routing::router()
+        let router = core::routing::router()
             .with_state(self.state.clone())
             .layer(self.create_service_builder());
 

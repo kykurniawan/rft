@@ -25,16 +25,9 @@ pub struct Sort {
 }
 
 #[derive(Debug, Clone)]
-pub enum FilterValue {
-    String(String),
-    Number(i64),
-    Boolean(bool),
-}
-
-#[derive(Debug, Clone)]
 pub struct Filter {
     pub by: String,
-    pub value: FilterValue,
+    pub value: String,
 }
 
 #[derive(Debug, Clone)]

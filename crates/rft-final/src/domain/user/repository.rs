@@ -3,7 +3,7 @@ use uuid::Uuid;
 
 use crate::domain::{
     shared::{
-        db::{FilterValue, Paginated, Pagination, Query, SortOrder},
+        db::{Paginated, Pagination, Query, SortOrder},
         error::RepositoryError,
     },
     user::User,
@@ -126,9 +126,12 @@ impl UserRepository {
             for filter in filters {
                 match filter.by.as_str() {
                     "is_active" => {
-                        if let FilterValue::Boolean(value) = &filter.value {
-                            builder.push(" AND is_active = ").push_bind(*value);
-                        }
+                        let value = match filter.value.as_str() {
+                            "true" => true,
+                            "false" => false,
+                            _ => continue,
+                        };
+                        builder.push(" AND is_active = ").push_bind(value);
                     }
 
                     _ => {}

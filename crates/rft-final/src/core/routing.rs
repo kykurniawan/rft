@@ -1,7 +1,7 @@
 use axum::{Router, routing::get};
 
-use crate::core::state::AppState;
+use crate::{core::state::AppState, domain::user};
 
 pub fn router() -> Router<AppState> {
-    Router::new().route("/", get(|| async { "Hello, World!" }))
+    Router::new().route("/api/users", get(user::handler::index))
 }
