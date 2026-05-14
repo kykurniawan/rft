@@ -44,17 +44,18 @@ pub enum AppError {
 
 impl IntoResponse for AppError {
     fn into_response(self) -> axum::response::Response {
-        let (status, error_message) = match &self {
-            AppError::NotFound(_) => (StatusCode::NOT_FOUND, self),
-            AppError::Conflict(_) => (StatusCode::CONFLICT, self),
-            AppError::BadRequest(_) => (StatusCode::BAD_REQUEST, self),
-            AppError::Internal(_) => {
+        let (status, error) = match &self {
+            AppError::NotFound(e) => (StatusCode::NOT_FOUND, e.to_string()),
+            AppError::Conflict(e) => (StatusCode::CONFLICT, e.to_string()),
+            AppError::BadRequest(e) => (StatusCode::BAD_REQUEST, e.to_string()),
+            AppError::Internal(e) => {
                 tracing::error!(?self, "internal server error");
-                (StatusCode::INTERNAL_SERVER_ERROR, self)
+                (StatusCode::INTERNAL_SERVER_ERROR, e.to_string())
             }
         };
 
-        let body = json!({ "error": error_message.to_string() });
+        let body = json!({ "error": error });
+
         (status, Json(body)).into_response()
     }
 }

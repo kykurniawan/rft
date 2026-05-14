@@ -2,14 +2,8 @@ use std::sync::Arc;
 
 use axum::serve;
 use tokio::net::TcpListener;
-use tower::{
-    ServiceBuilder,
-    layer::util::{Identity, Stack},
-};
-use tower_http::{
-    classify::{ServerErrorsAsFailures, SharedClassifier},
-    trace::TraceLayer,
-};
+use tower::ServiceBuilder;
+use tower_http::trace::TraceLayer;
 use tracing::info;
 use tracing_appender::non_blocking::WorkerGuard;
 
@@ -56,7 +50,7 @@ impl App {
 
         let router = core::routing::router()
             .with_state(self.state.clone())
-            .layer(self.create_service_builder());
+            .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()));
 
         let address = format!("{}:{}", self.config.server.host, self.config.server.port);
 
@@ -67,11 +61,5 @@ impl App {
         serve(listener, router).await?;
 
         Ok(())
-    }
-
-    fn create_service_builder(
-        &self,
-    ) -> ServiceBuilder<Stack<TraceLayer<SharedClassifier<ServerErrorsAsFailures>>, Identity>> {
-        ServiceBuilder::new().layer(TraceLayer::new_for_http())
     }
 }
