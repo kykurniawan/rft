@@ -2,7 +2,7 @@ use axum::{
     Json,
     extract::{Path, State},
 };
-use axum_extra::extract::Query;
+use axum_extra::extract::{Query, WithRejection};
 use uuid::Uuid;
 
 use crate::{
@@ -26,7 +26,7 @@ pub async fn index(
         Ok(users) => users,
         Err(error) => match error {
             UserServiceError::InvalidFilter(_) => {
-                return Err(AppError::BadRequest(error.to_string()));
+                return Err(AppError::ValidationError(error.to_string()));
             }
             _ => return Err(AppError::Internal(error.to_string())),
         },
@@ -42,7 +42,7 @@ pub async fn index(
 
 pub async fn show(
     State(state): State<AppState>,
-    Path(id): Path<Uuid>,
+    WithRejection(Path(id), _): WithRejection<Path<Uuid>, AppError>,
 ) -> Result<Json<UserResponse>, AppError> {
     let user = state.user_service.get_user_by_id(id).await;
 

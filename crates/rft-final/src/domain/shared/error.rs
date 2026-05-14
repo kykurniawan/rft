@@ -1,4 +1,4 @@
-use axum::{Json, http::StatusCode, response::IntoResponse};
+use axum::{Json, extract::rejection::PathRejection, http::StatusCode, response::IntoResponse};
 use serde_json::json;
 
 #[derive(Debug, thiserror::Error)]
@@ -38,8 +38,11 @@ pub enum AppError {
     #[error("internal error: {0:?}")]
     Internal(String),
 
-    #[error("bad request: {0}")]
-    BadRequest(String),
+    #[error("validation error: {0}")]
+    ValidationError(String),
+
+    #[error(transparent)]
+    PathExtractorError(#[from] PathRejection),
 }
 
 impl IntoResponse for AppError {
@@ -47,11 +50,9 @@ impl IntoResponse for AppError {
         let (status, error) = match &self {
             AppError::NotFound(e) => (StatusCode::NOT_FOUND, e.to_string()),
             AppError::Conflict(e) => (StatusCode::CONFLICT, e.to_string()),
-            AppError::BadRequest(e) => (StatusCode::BAD_REQUEST, e.to_string()),
-            AppError::Internal(e) => {
-                tracing::error!(?self, "internal server error");
-                (StatusCode::INTERNAL_SERVER_ERROR, e.to_string())
-            }
+            AppError::ValidationError(e) => (StatusCode::BAD_REQUEST, e.to_string()),
+            AppError::Internal(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
+            AppError::PathExtractorError(e) => (e.status(), e.body_text()),
         };
 
         let body = json!({ "error": error });

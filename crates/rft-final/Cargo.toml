@@ -20,4 +20,4 @@ tracing-appender = "0.2.3"
 tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 config = "0.15.22"
 chrono = { version = "0.4.44", features = ["serde"] }
-axum-extra = { version = "0.12.6", features = ["query"] }
+axum-extra = { version = "0.12.6", features = ["query", "with-rejection"] }
