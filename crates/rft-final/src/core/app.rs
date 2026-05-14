@@ -14,7 +14,7 @@ use crate::{
 };
 
 pub async fn init(config: core::config::Config) -> Result<App, Box<dyn std::error::Error>> {
-    let tracing = core::tracing::init(&config.tracing);
+    let tracing = infra::tracing::init(&config.tracing);
 
     info!("initializing application");
 
@@ -31,9 +31,9 @@ pub async fn init(config: core::config::Config) -> Result<App, Box<dyn std::erro
     info!("application initialized");
 
     Ok(App {
+        tracing,
         config,
         state,
-        tracing,
     })
 }
 
