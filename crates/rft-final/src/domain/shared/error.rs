@@ -1,4 +1,9 @@
-use axum::{Json, extract::rejection::PathRejection, http::StatusCode, response::IntoResponse};
+use axum::{
+    Json,
+    extract::rejection::{JsonRejection, PathRejection},
+    http::StatusCode,
+    response::IntoResponse,
+};
 use serde_json::json;
 
 #[derive(Debug, thiserror::Error)]
@@ -43,6 +48,9 @@ pub enum AppError {
 
     #[error(transparent)]
     PathExtractorError(#[from] PathRejection),
+
+    #[error(transparent)]
+    JsonExtractorError(#[from] JsonRejection),
 }
 
 impl IntoResponse for AppError {
@@ -53,6 +61,7 @@ impl IntoResponse for AppError {
             AppError::ValidationError(e) => (StatusCode::BAD_REQUEST, e.to_string()),
             AppError::Internal(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
             AppError::PathExtractorError(e) => (e.status(), e.body_text()),
+            AppError::JsonExtractorError(e) => (e.status(), e.body_text()),
         };
 
         let body = json!({ "error": error });

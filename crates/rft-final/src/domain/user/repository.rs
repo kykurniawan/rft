@@ -144,4 +144,30 @@ impl UserRepository {
 
         Ok(user)
     }
+
+    pub async fn find_by_name(&self, name: &str) -> Result<Option<User>, RepositoryError> {
+        let user = sqlx::query_as(
+            "SELECT id, name, is_active, created_at, updated_at FROM users WHERE name = $1",
+        )
+        .bind(name)
+        .fetch_optional(&self.db)
+        .await?;
+
+        Ok(user)
+    }
+
+    pub async fn save(&self, user: &User) -> Result<User, RepositoryError> {
+        let created = sqlx::query_as(
+            "INSERT INTO users (id, name, is_active, created_at, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id, name, is_active, created_at, updated_at",
+        )
+        .bind(user.id)
+        .bind(&user.name)
+        .bind(user.is_active)
+        .bind(user.created_at)
+        .bind(user.updated_at)
+        .fetch_one(&self.db)
+        .await?;
+
+        Ok(created)
+    }
 }

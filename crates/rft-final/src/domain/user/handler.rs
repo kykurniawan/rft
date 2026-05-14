@@ -1,6 +1,7 @@
 use axum::{
     Json,
     extract::{Path, State},
+    http::StatusCode,
 };
 use axum_extra::extract::{Query, WithRejection};
 use uuid::Uuid;
@@ -12,7 +13,7 @@ use crate::{
             dto::{PaginatedResponse, PaginationRequest},
             error::AppError,
         },
-        user::{UserResponse, UserServiceError},
+        user::{CreateUserRequest, UserResponse, UserServiceError},
     },
 };
 
@@ -60,4 +61,23 @@ pub async fn show(
     };
 
     Ok(Json(UserResponse::from(user)))
+}
+
+pub async fn store(
+    State(state): State<AppState>,
+    WithRejection(Json(request), _): WithRejection<Json<CreateUserRequest>, AppError>,
+) -> Result<(StatusCode, Json<UserResponse>), AppError> {
+    let user = state.user_service.create_user(&request.name).await;
+
+    let user = match user {
+        Ok(user) => user,
+        Err(error) => match error {
+            UserServiceError::NameAlreadyExists => {
+                return Err(AppError::Conflict(error.to_string()));
+            }
+            _ => return Err(AppError::Internal(error.to_string())),
+        },
+    };
+
+    Ok((StatusCode::CREATED, Json(UserResponse::from(user))))
 }

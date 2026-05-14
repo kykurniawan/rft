@@ -8,9 +8,6 @@ pub enum UserServiceError {
     #[error("name already exists")]
     NameAlreadyExists,
 
-    #[error("user is inactive")]
-    UserInactive,
-
     #[error("invalid filter by: {0}")]
     InvalidFilter(String),
 

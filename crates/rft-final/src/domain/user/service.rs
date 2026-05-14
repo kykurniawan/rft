@@ -52,4 +52,18 @@ impl UserService {
 
         Ok(user)
     }
+
+    pub async fn create_user(&self, name: &str) -> Result<User, UserServiceError> {
+        let existing = self.repository.find_by_name(name).await;
+
+        match existing {
+            Ok(Some(_)) => return Err(UserServiceError::NameAlreadyExists),
+            Ok(None) => {}
+            Err(e) => return Err(e.into()),
+        };
+
+        let user = User::new(Uuid::now_v7(), name.to_string(), true);
+
+        self.repository.save(&user).await.map_err(Into::into)
+    }
 }

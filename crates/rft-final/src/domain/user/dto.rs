@@ -1,8 +1,13 @@
 use chrono::{DateTime, Utc};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::domain::user::User;
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct CreateUserRequest {
+    pub name: String,
+}
 
 #[derive(Debug, Clone, Serialize)]
 pub struct UserResponse {
